@@ -15,6 +15,7 @@
     "check": "biome check",
     "deploy": "pnpm run build && wrangler deploy",
     "cf-typegen": "wrangler types",
+    "auth:generate": "pnpm dlx auth@latest generate --config ./src/lib/auth.ts --output ./src/db/auth.ts --adapter drizzle --dialect sqlite -y",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
