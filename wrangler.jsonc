@@ -9,6 +9,7 @@
 	"main": "@tanstack/react-start/server-entry",
 	"d1_databases": [
 		{
+			"migrations_dir": "./drizzle",
 			"binding": "DB",
 			"database_name": "flyway-sequence",
 			"database_id": "77fb0672-0c48-4c6c-8f0d-57814a4f7a2a"
