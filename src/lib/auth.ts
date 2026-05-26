@@ -12,9 +12,11 @@ export function createAuthServer(db: DBClient) {
 		emailAndPassword: {
 			enabled: true,
 		},
-		github: {
-			clientId: env.GITHUB_CLIENT_ID,
-			clientSecret: env.GITHUB_CLIENT_SECRET,
+		socialProviders: {
+			github: {
+				clientId: env.GITHUB_CLIENT_ID,
+				clientSecret: env.GITHUB_CLIENT_SECRET,
+			},
 		},
 		plugins: [tanstackStartCookies()],
 	});
