@@ -8,7 +8,8 @@ export const env = createEnv({
     GITHUB_CLIENT_SECRET: z.string().nonempty(),
     CLOUDFLARE_ACCOUNT_ID: z.string().nonempty(),
     CLOUDFLARE_DATABASE_ID: z.string().nonempty(),
-    CLOUDFLARE_D1_TOKEN: z.string().nonempty()
+    CLOUDFLARE_D1_TOKEN: z.string().nonempty(),
+    GITHUB_ORGANIZATION: z.string().nonempty()
   },
 
   /**

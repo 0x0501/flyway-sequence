@@ -16,6 +16,7 @@ export function createAuthServer(db: DBClient) {
 			github: {
 				clientId: env.GITHUB_CLIENT_ID,
 				clientSecret: env.GITHUB_CLIENT_SECRET,
+				scopes: ["user:email", "user:email", "read:org"],
 			},
 		},
 		plugins: [tanstackStartCookies()],
