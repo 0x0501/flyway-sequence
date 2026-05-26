@@ -5,7 +5,10 @@ export const env = createEnv({
   server: {
     SERVER_URL: z.url().optional(),
     GITHUB_CLIENT_ID: z.string().nonempty(),
-    GITHUB_CLIENT_SECRET: z.string().nonempty()
+    GITHUB_CLIENT_SECRET: z.string().nonempty(),
+    CLOUDFLARE_ACCOUNT_ID: z.string().nonempty(),
+    CLOUDFLARE_DATABASE_ID: z.string().nonempty(),
+    CLOUDFLARE_D1_TOKEN: z.string().nonempty()
   },
 
   /**
