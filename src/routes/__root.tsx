@@ -114,6 +114,9 @@ function SiteFooter() {
 					>
 						OAuth metadata
 					</a>
+					<a className="hover:text-[var(--ink)]" href="/api/mcp">
+						MCP endpoint
+					</a>
 				</div>
 			</div>
 		</footer>
