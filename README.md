@@ -1,6 +1,6 @@
 # Flyway sequence
 
-Get the latest flyway-migration sequential number from centralized server.
+Get the latest flyway-migration sequential number from Cloudflare Worker.
 
 To run this application:
 
