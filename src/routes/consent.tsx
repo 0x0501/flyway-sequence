@@ -1,14 +1,6 @@
-import {
-	Button,
-	Card,
-	CardFooter,
-	CardHeader,
-	Link,
-	Separator,
-	Spinner,
-} from "@heroui/react";
 import { ClientOnly, createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+
 import { authClient } from "#/lib/auth-client.ts";
 import { getErrorMessage } from "#/lib/error-message.ts";
 
@@ -18,33 +10,17 @@ export const Route = createFileRoute("/consent")({
 
 function ConsentRoute() {
 	return (
-		<div className="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-800 px-4 py-10 text-slate-50">
-			<div className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-5xl items-center justify-center">
-				<ClientOnly fallback={<ConsentFallback />}>
-					<ConsentCard />
+		<div className="px-6 py-16 md:py-24">
+			<div className="mx-auto flex w-full max-w-2xl flex-col">
+				<ClientOnly fallback={<ConsentShell state="loading" />}>
+					<ConsentPanel />
 				</ClientOnly>
 			</div>
 		</div>
 	);
 }
 
-function ConsentFallback() {
-	return (
-		<Card className="w-full max-w-2xl border border-white/10 bg-white/10 text-white shadow-2xl backdrop-blur">
-			<Card.Content className="flex items-center gap-4 py-14 text-center">
-				<Spinner color="current" size="lg" />
-				<div>
-					<p className="text-lg font-semibold">Loading authorization request</p>
-					<p className="text-sm text-white/70">
-						Checking your session and requested scopes.
-					</p>
-				</div>
-			</Card.Content>
-		</Card>
-	);
-}
-
-function ConsentCard() {
+function ConsentPanel() {
 	const { data: session, isPending } = authClient.useSession();
 	const [error, setError] = useState<string | null>(null);
 	const [isSubmitting, setIsSubmitting] = useState(false);
@@ -60,7 +36,6 @@ function ConsentCard() {
 		if (!session) {
 			return;
 		}
-
 		setError(null);
 	}, [session]);
 
@@ -92,110 +67,129 @@ function ConsentCard() {
 	}
 
 	if (isPending) {
-		return <ConsentFallback />;
+		return <ConsentShell state="loading" />;
 	}
 
 	if (!session) {
 		return (
-			<Card className="w-full max-w-2xl border border-amber-300/30 bg-slate-950/85 text-white shadow-2xl">
-				<CardHeader className="flex flex-col items-start gap-2">
-					<p className="text-sm uppercase tracking-[0.3em] text-amber-300">
-						Sign in required
-					</p>
-					<h1 className="text-3xl font-semibold">
-						You need an account session first
-					</h1>
-				</CardHeader>
-				<Card.Content className="space-y-3 text-white/75">
-					<p>
-						This OAuth authorization request can only continue after you sign in
-						with GitHub.
-					</p>
-				</Card.Content>
-				<CardFooter>
-					<Link
-						className="bg-amber-300 font-semibold text-slate-950"
+			<div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-elevated)] p-8 md:p-10">
+				<p className="text-xs font-medium text-[var(--warning-ink)]">
+					Sign-in needed
+				</p>
+				<h1 className="mt-2 text-2xl font-semibold tracking-tight text-[var(--ink)] md:text-[1.75rem]">
+					Authorize after you sign in
+				</h1>
+				<p className="mt-3 text-[15px] leading-relaxed text-[var(--ink-muted)]">
+					This authorization request can only continue once you have signed in
+					with a GitHub account that belongs to the approved organization.
+				</p>
+				<div className="mt-7 flex justify-end">
+					<a
+						className="inline-flex h-11 items-center justify-center rounded-md bg-[var(--accent)] px-5 text-sm font-medium text-[var(--accent-ink)] transition-opacity hover:opacity-90"
 						href={signInHref}
 					>
 						Go to sign in
-					</Link>
-				</CardFooter>
-			</Card>
+					</a>
+				</div>
+			</div>
 		);
 	}
 
+	const identity =
+		session.user?.name ?? session.user?.email ?? session.user?.id;
+
 	return (
-		<Card className="w-full max-w-2xl border border-white/10 bg-slate-950/85 text-white shadow-2xl">
-			<CardHeader className="flex flex-col items-start gap-3">
-				<p className="text-sm uppercase tracking-[0.3em] text-cyan-300">
-					OAuth Authorization
+		<div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-elevated)] p-8 md:p-10">
+			<div className="space-y-2">
+				<p className="text-xs font-medium text-[var(--accent)]">
+					Authorization
 				</p>
-				<div className="space-y-2">
-					<h1 className="text-3xl font-semibold">Grant MCP access</h1>
-					<p className="text-sm text-white/70">
-						Signed in as{" "}
-						<span className="font-medium text-white">
-							{session.user.name ?? session.user.email ?? session.user.id}
-						</span>
-					</p>
-				</div>
-			</CardHeader>
-			<Separator className="bg-white/10" />
-			<Card.Content className="space-y-6">
-				<p className="text-sm leading-7 text-white/75">
-					This client is requesting permission to call your MCP tools. Access is
-					issued only to approved GitHub organization members.
+				<h1 className="text-2xl font-semibold tracking-tight text-[var(--ink)] md:text-[1.75rem]">
+					Grant MCP access
+				</h1>
+				<p className="text-[15px] leading-relaxed text-[var(--ink-muted)]">
+					Signed in as{" "}
+					<span className="font-medium text-[var(--ink)]">{identity}</span>. A
+					client is asking to call your MCP tools.
 				</p>
+			</div>
 
-				<div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-					<p className="text-xs uppercase tracking-[0.25em] text-white/45">
-						Requested scopes
-					</p>
-					<div className="mt-3 flex flex-wrap gap-2">
-						{scopes.length > 0 ? (
-							scopes.map((scope) => (
-								<span
-									key={scope}
-									className="rounded-full border border-cyan-300/30 bg-cyan-400/10 px-3 py-1 text-xs font-medium text-cyan-100"
-								>
-									{scope}
-								</span>
-							))
-						) : (
-							<span className="text-sm text-white/55">
-								No explicit scopes were requested.
+			<div className="my-7 h-px bg-[var(--border)]" />
+
+			<div className="rounded-xl border border-[var(--border)] bg-[var(--bg)] p-5">
+				<p className="text-[13px] font-medium text-[var(--ink-muted)]">
+					Requested scopes
+				</p>
+				<div className="mt-3 flex flex-wrap gap-2">
+					{scopes.length > 0 ? (
+						scopes.map((scope) => (
+							<span
+								key={scope}
+								className="rounded-md border border-[var(--border-strong)] bg-[var(--bg-elevated)] px-2.5 py-1 font-mono text-[12px] text-[var(--ink)]"
+							>
+								{scope}
 							</span>
-						)}
-					</div>
+						))
+					) : (
+						<span className="text-sm text-[var(--ink-subtle)]">
+							No explicit scopes requested.
+						</span>
+					)}
 				</div>
+			</div>
 
-				{error ? (
-					<div className="rounded-2xl border border-rose-300/35 bg-rose-400/10 px-4 py-3 text-sm text-rose-100">
-						{error}
-					</div>
-				) : null}
-			</Card.Content>
-			<CardFooter className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-				<Button
-					className="w-full border border-white/15 bg-transparent text-white sm:w-auto"
-					isDisabled={isSubmitting}
-					onPress={() => {
+			{error ? (
+				<div className="mt-5 rounded-xl border border-[color:color-mix(in_srgb,var(--danger)_35%,transparent)] bg-[var(--danger-soft)] px-4 py-3 text-sm leading-relaxed text-[var(--danger)]">
+					<p className="font-medium text-[var(--ink)]">Authorization failed</p>
+					<p className="mt-0.5">{error}</p>
+				</div>
+			) : null}
+
+			<div className="mt-7 flex flex-col gap-3 sm:flex-row sm:justify-end">
+				<button
+					type="button"
+					disabled={isSubmitting}
+					className="inline-flex h-11 items-center justify-center rounded-md border border-[var(--border-strong)] bg-[var(--bg-elevated)] px-5 text-sm font-medium text-[var(--ink)] transition-colors hover:bg-[var(--bg)] disabled:opacity-50"
+					onClick={() => {
 						void handleConsent(false);
 					}}
-					variant="outline"
 				>
 					Deny
-				</Button>
-				<Button
-					className="w-full bg-cyan-300 font-semibold text-slate-950 sm:w-auto"
-					isPending={isSubmitting}
-					onPress={() => {
+				</button>
+				<button
+					type="button"
+					disabled={isSubmitting}
+					className="inline-flex h-11 items-center justify-center rounded-md bg-[var(--accent)] px-5 text-sm font-medium text-[var(--accent-ink)] transition-opacity hover:opacity-90 disabled:opacity-50"
+					onClick={() => {
 						void handleConsent(true);
 					}}
 				>
-					Authorize MCP access
-				</Button>
-			</CardFooter>
-		</Card>
+					{isSubmitting ? "Authorizing..." : "Authorize access"}
+				</button>
+			</div>
+		</div>
+	);
+}
+
+function ConsentShell({ state: _state }: { state: "loading" }) {
+	return (
+		<div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-elevated)] p-8 md:p-10">
+			<p className="text-xs font-medium text-[var(--accent)]">Authorization</p>
+			<h1 className="mt-2 text-2xl font-semibold tracking-tight text-[var(--ink)] md:text-[1.75rem]">
+				Grant MCP access
+			</h1>
+			<p className="mt-3 text-[15px] leading-relaxed text-[var(--ink-muted)]">
+				Loading the authorization request.
+			</p>
+			<div className="my-7 h-px bg-[var(--border)]" />
+			<div className="space-y-2">
+				<div className="h-4 w-32 animate-pulse rounded bg-[var(--border)]" />
+				<div className="h-7 w-full animate-pulse rounded bg-[var(--border)]" />
+			</div>
+			<div className="mt-7 flex justify-end gap-3">
+				<div className="h-11 w-20 animate-pulse rounded-md bg-[var(--border)]" />
+				<div className="h-11 w-40 animate-pulse rounded-md bg-[var(--border)]" />
+			</div>
+		</div>
 	);
 }

@@ -1,13 +1,6 @@
-import {
-	Button,
-	Card,
-	CardBody,
-	CardFooter,
-	CardHeader,
-	Link,
-} from "@heroui/react";
 import { ClientOnly, createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+
 import { authClient } from "#/lib/auth-client.ts";
 import { getAuthorizationResumePath } from "#/lib/sign-in-flow.ts";
 
@@ -15,34 +8,25 @@ export const Route = createFileRoute("/sign-in")({
 	component: SignInRoute,
 });
 
+type OrgCheckState = "idle" | "checking" | "authorized" | "denied";
+
 function SignInRoute() {
 	return (
-		<div className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.16),transparent_32%),linear-gradient(135deg,#020617,#111827_52%,#0f172a)] px-4 py-10 text-slate-50">
-			<div className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-5xl items-center justify-center">
-				<ClientOnly fallback={<SignInFallback />}>
-					<SignInCard />
+		<div className="px-6 py-16 md:py-24">
+			<div className="mx-auto flex w-full max-w-xl flex-col">
+				<ClientOnly fallback={<SignInShell state="idle" />}>
+					<SignInPanel />
 				</ClientOnly>
 			</div>
 		</div>
 	);
 }
 
-function SignInFallback() {
-	return (
-		<Card className="w-full max-w-xl border border-white/10 bg-white/10 text-white shadow-2xl backdrop-blur">
-			<Card.Content className="py-14 text-center text-white/70">
-				Preparing GitHub sign-in...
-			</Card.Content>
-		</Card>
-	);
-}
-
-function SignInCard() {
+function SignInPanel() {
 	const { data: session, isPending } = authClient.useSession();
-	const [orgCheckState, setOrgCheckState] = useState<
-		"idle" | "checking" | "authorized" | "denied"
-	>("idle");
+	const [orgCheckState, setOrgCheckState] = useState<OrgCheckState>("idle");
 	const [error, setError] = useState<string | null>(null);
+
 	const searchParams = useMemo(
 		() => new URLSearchParams(window.location.search),
 		[],
@@ -106,77 +90,134 @@ function SignInCard() {
 	}, [session]);
 
 	if (isPending) {
-		return <SignInFallback />;
+		return <SignInShell state="loading" />;
 	}
 
+	const identity =
+		session?.user?.name ?? session?.user?.email ?? session?.user?.id;
+
 	return (
-		<Card className="w-full max-w-xl border border-white/10 bg-slate-950/85 text-white shadow-2xl">
-			<CardHeader className="flex flex-col items-start gap-3">
-				<p className="text-sm uppercase tracking-[0.3em] text-cyan-300">
-					GitHub Sign-in
+		<div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-elevated)] p-8 md:p-10">
+			<div className="space-y-2">
+				<p className="text-xs font-medium text-[var(--accent)]">Sign in</p>
+				<h1 className="text-2xl font-semibold tracking-tight text-[var(--ink)] md:text-[1.75rem]">
+					Verify your GitHub org membership
+				</h1>
+				<p className="text-[15px] leading-relaxed text-[var(--ink-muted)]">
+					Tokens issue only to members of the approved organization. We re-check
+					membership on every sign-in.
 				</p>
-				<div className="space-y-2">
-					<h1 className="text-3xl font-semibold">
-						Authorize organization members only
-					</h1>
-					<p className="text-sm leading-7 text-white/70">
-						Sign in with GitHub to continue the OAuth flow. We only issue MCP
-						access tokens to members of the approved GitHub organization.
-					</p>
-				</div>
-			</CardHeader>
-			<CardBody className="space-y-4">
-				{session ? (
-					<>
-						<div className="rounded-2xl border border-emerald-300/30 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-100">
-							Signed in as{" "}
-							{session.user.name ?? session.user.email ?? session.user.id}.
-						</div>
-						{orgCheckState === "checking" ? (
-							<div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70">
-								Verifying GitHub organization membership...
-							</div>
-						) : null}
-						{orgCheckState === "authorized" ? (
-							<div className="rounded-2xl border border-cyan-300/30 bg-cyan-400/10 px-4 py-3 text-sm text-cyan-100">
-								GitHub organization access verified.
-							</div>
-						) : null}
-						{orgCheckState === "denied" ? (
-							<div className="rounded-2xl border border-rose-300/35 bg-rose-400/10 px-4 py-3 text-sm text-rose-100">
-								{error}
-							</div>
-						) : null}
-					</>
-				) : (
-					<div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70">
-						We will request GitHub organization-read access so membership can be
-						verified before any MCP token is issued.
-					</div>
-				)}
-			</CardBody>
-			<CardFooter className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+			</div>
+
+			<div className="my-7 h-px bg-[var(--border)]" />
+
+			{!session ? (
+				<Status
+					tone="muted"
+					title="Read-only org permission requested"
+					body="We ask for read:org so we can verify your membership and nothing more."
+				/>
+			) : null}
+
+			{session && orgCheckState === "checking" ? (
+				<Status
+					tone="muted"
+					title={`Checking @${identity}`}
+					body="Looking up your membership in the approved organization."
+				/>
+			) : null}
+
+			{session && orgCheckState === "authorized" ? (
+				<Status
+					tone="success"
+					title={`Approved as ${identity}`}
+					body="You can continue to the authorization step."
+				/>
+			) : null}
+
+			{session && orgCheckState === "denied" ? (
+				<Status
+					tone="danger"
+					title="Not an organization member"
+					body={
+						error ?? "Only approved GitHub organization members can sign in."
+					}
+				/>
+			) : null}
+
+			<div className="mt-7 flex flex-col gap-3 sm:flex-row sm:justify-end">
 				{session && orgCheckState === "authorized" && nextHref ? (
-					<Link
-						className="w-full bg-cyan-300 font-semibold text-slate-950 sm:w-auto"
+					<a
+						className="inline-flex h-11 items-center justify-center rounded-md bg-[var(--accent)] px-5 text-sm font-medium text-[var(--accent-ink)] transition-opacity hover:opacity-90 sm:w-auto"
 						href={nextHref}
 					>
 						Continue
-					</Link>
+					</a>
 				) : (
-					<Button
-						className="w-full bg-cyan-300 font-semibold text-slate-950 sm:w-auto"
-						isDisabled={orgCheckState === "checking"}
-						onPress={() => {
-							void handleSignIn();
-						}}
-					>
-						{session && orgCheckState === "denied"
-							? "Sign in with another GitHub account"
-							: "Sign in with GitHub"}
-					</Button>
+					!session && (
+						<button
+							type="button"
+							disabled={orgCheckState === "checking"}
+							className="inline-flex h-11 items-center justify-center rounded-md bg-[var(--accent)] px-5 text-sm font-medium text-[var(--accent-ink)] transition-opacity hover:opacity-90 disabled:opacity-50"
+							onClick={() => {
+								void handleSignIn();
+							}}
+						>
+							{session && orgCheckState === "denied"
+								? "Try another GitHub account"
+								: "Sign in with GitHub"}
+						</button>
+					)
 				)}
-			</CardFooter>
-		</Card>
+			</div>
+		</div>
+	);
+}
+
+function SignInShell({ state }: { state: "idle" | "loading" }) {
+	return (
+		<div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-elevated)] p-8 md:p-10">
+			<div className="space-y-2">
+				<p className="text-xs font-medium text-[var(--accent)]">Sign in</p>
+				<h1 className="text-2xl font-semibold tracking-tight text-[var(--ink)] md:text-[1.75rem]">
+					Verify your GitHub org membership
+				</h1>
+				<p className="text-[15px] leading-relaxed text-[var(--ink-muted)]">
+					{state === "loading"
+						? "Restoring your session."
+						: "Preparing the sign-in flow."}
+				</p>
+			</div>
+			<div className="my-7 h-px bg-[var(--border)]" />
+			<div className="mt-7 flex justify-end">
+				<div className="h-11 w-44 animate-pulse rounded-md bg-[var(--border)]" />
+			</div>
+		</div>
+	);
+}
+
+function Status({
+	tone,
+	title,
+	body,
+}: {
+	tone: "muted" | "success" | "danger";
+	title: string;
+	body: string;
+}) {
+	const toneClasses: Record<typeof tone, string> = {
+		muted: "border-[var(--border)] bg-[var(--bg)] text-[var(--ink-muted)]",
+		success:
+			"border-[color:color-mix(in_oklab,var(--accent)_30%,transparent)] bg-[var(--accent-soft)] text-[var(--accent)]",
+		danger:
+			"border-[color:color-mix(in_oklab,var(--danger)_35%,transparent)] bg-[var(--danger-soft)] text-[var(--danger)]",
+	};
+	return (
+		<div
+			className={`rounded-xl border px-4 py-3 text-sm leading-relaxed ${toneClasses[tone]}`}
+		>
+			<p className="font-medium text-[var(--ink)]">{title}</p>
+			<p className="mt-0.5">{body}</p>
+		</div>
 	);
 }
