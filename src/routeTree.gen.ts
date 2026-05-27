@@ -9,13 +9,26 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as McpRouteImport } from './routes/mcp'
+import { Route as SignInRouteImport } from './routes/sign-in'
+import { Route as ConsentRouteImport } from './routes/consent'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiMcpRouteImport } from './routes/api/mcp'
+import { Route as DotwellKnownOauthAuthorizationServerIndexRouteImport } from './routes/[.]well-known/oauth-authorization-server/index'
+import { Route as ApiAuthGithubOrgAccessRouteImport } from './routes/api/auth/github-org-access'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ApiAuthOauth2ConsentRouteImport } from './routes/api/auth/oauth2/consent'
+import { Route as ApiAuthDotwellKnownOpenidConfigurationRouteImport } from './routes/api/auth/[.]well-known/openid-configuration'
+import { Route as DotwellKnownOauthProtectedResourceApiMcpRouteImport } from './routes/[.]well-known/oauth-protected-resource/api/mcp'
+import { Route as DotwellKnownOauthAuthorizationServerApiAuthRouteImport } from './routes/[.]well-known/oauth-authorization-server/api/auth'
 
-const McpRoute = McpRouteImport.update({
-  id: '/mcp',
-  path: '/mcp',
+const SignInRoute = SignInRouteImport.update({
+  id: '/sign-in',
+  path: '/sign-in',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConsentRoute = ConsentRouteImport.update({
+  id: '/consent',
+  path: '/consent',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -23,49 +36,161 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiMcpRoute = ApiMcpRouteImport.update({
+  id: '/api/mcp',
+  path: '/api/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DotwellKnownOauthAuthorizationServerIndexRoute =
+  DotwellKnownOauthAuthorizationServerIndexRouteImport.update({
+    id: '/.well-known/oauth-authorization-server/',
+    path: '/.well-known/oauth-authorization-server/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiAuthGithubOrgAccessRoute = ApiAuthGithubOrgAccessRouteImport.update({
+  id: '/api/auth/github-org-access',
+  path: '/api/auth/github-org-access',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAuthOauth2ConsentRoute = ApiAuthOauth2ConsentRouteImport.update({
+  id: '/api/auth/oauth2/consent',
+  path: '/api/auth/oauth2/consent',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthDotwellKnownOpenidConfigurationRoute =
+  ApiAuthDotwellKnownOpenidConfigurationRouteImport.update({
+    id: '/api/auth/.well-known/openid-configuration',
+    path: '/api/auth/.well-known/openid-configuration',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const DotwellKnownOauthProtectedResourceApiMcpRoute =
+  DotwellKnownOauthProtectedResourceApiMcpRouteImport.update({
+    id: '/.well-known/oauth-protected-resource/api/mcp',
+    path: '/.well-known/oauth-protected-resource/api/mcp',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const DotwellKnownOauthAuthorizationServerApiAuthRoute =
+  DotwellKnownOauthAuthorizationServerApiAuthRouteImport.update({
+    id: '/.well-known/oauth-authorization-server/api/auth',
+    path: '/.well-known/oauth-authorization-server/api/auth',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/mcp': typeof McpRoute
+  '/consent': typeof ConsentRoute
+  '/sign-in': typeof SignInRoute
+  '/api/mcp': typeof ApiMcpRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/auth/github-org-access': typeof ApiAuthGithubOrgAccessRoute
+  '/.well-known/oauth-authorization-server/': typeof DotwellKnownOauthAuthorizationServerIndexRoute
+  '/.well-known/oauth-authorization-server/api/auth': typeof DotwellKnownOauthAuthorizationServerApiAuthRoute
+  '/.well-known/oauth-protected-resource/api/mcp': typeof DotwellKnownOauthProtectedResourceApiMcpRoute
+  '/api/auth/.well-known/openid-configuration': typeof ApiAuthDotwellKnownOpenidConfigurationRoute
+  '/api/auth/oauth2/consent': typeof ApiAuthOauth2ConsentRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/mcp': typeof McpRoute
+  '/consent': typeof ConsentRoute
+  '/sign-in': typeof SignInRoute
+  '/api/mcp': typeof ApiMcpRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/auth/github-org-access': typeof ApiAuthGithubOrgAccessRoute
+  '/.well-known/oauth-authorization-server': typeof DotwellKnownOauthAuthorizationServerIndexRoute
+  '/.well-known/oauth-authorization-server/api/auth': typeof DotwellKnownOauthAuthorizationServerApiAuthRoute
+  '/.well-known/oauth-protected-resource/api/mcp': typeof DotwellKnownOauthProtectedResourceApiMcpRoute
+  '/api/auth/.well-known/openid-configuration': typeof ApiAuthDotwellKnownOpenidConfigurationRoute
+  '/api/auth/oauth2/consent': typeof ApiAuthOauth2ConsentRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/mcp': typeof McpRoute
+  '/consent': typeof ConsentRoute
+  '/sign-in': typeof SignInRoute
+  '/api/mcp': typeof ApiMcpRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/auth/github-org-access': typeof ApiAuthGithubOrgAccessRoute
+  '/.well-known/oauth-authorization-server/': typeof DotwellKnownOauthAuthorizationServerIndexRoute
+  '/.well-known/oauth-authorization-server/api/auth': typeof DotwellKnownOauthAuthorizationServerApiAuthRoute
+  '/.well-known/oauth-protected-resource/api/mcp': typeof DotwellKnownOauthProtectedResourceApiMcpRoute
+  '/api/auth/.well-known/openid-configuration': typeof ApiAuthDotwellKnownOpenidConfigurationRoute
+  '/api/auth/oauth2/consent': typeof ApiAuthOauth2ConsentRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/mcp' | '/api/auth/$'
+  fullPaths:
+    | '/'
+    | '/consent'
+    | '/sign-in'
+    | '/api/mcp'
+    | '/api/auth/$'
+    | '/api/auth/github-org-access'
+    | '/.well-known/oauth-authorization-server/'
+    | '/.well-known/oauth-authorization-server/api/auth'
+    | '/.well-known/oauth-protected-resource/api/mcp'
+    | '/api/auth/.well-known/openid-configuration'
+    | '/api/auth/oauth2/consent'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/mcp' | '/api/auth/$'
-  id: '__root__' | '/' | '/mcp' | '/api/auth/$'
+  to:
+    | '/'
+    | '/consent'
+    | '/sign-in'
+    | '/api/mcp'
+    | '/api/auth/$'
+    | '/api/auth/github-org-access'
+    | '/.well-known/oauth-authorization-server'
+    | '/.well-known/oauth-authorization-server/api/auth'
+    | '/.well-known/oauth-protected-resource/api/mcp'
+    | '/api/auth/.well-known/openid-configuration'
+    | '/api/auth/oauth2/consent'
+  id:
+    | '__root__'
+    | '/'
+    | '/consent'
+    | '/sign-in'
+    | '/api/mcp'
+    | '/api/auth/$'
+    | '/api/auth/github-org-access'
+    | '/.well-known/oauth-authorization-server/'
+    | '/.well-known/oauth-authorization-server/api/auth'
+    | '/.well-known/oauth-protected-resource/api/mcp'
+    | '/api/auth/.well-known/openid-configuration'
+    | '/api/auth/oauth2/consent'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  McpRoute: typeof McpRoute
+  ConsentRoute: typeof ConsentRoute
+  SignInRoute: typeof SignInRoute
+  ApiMcpRoute: typeof ApiMcpRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiAuthGithubOrgAccessRoute: typeof ApiAuthGithubOrgAccessRoute
+  DotwellKnownOauthAuthorizationServerIndexRoute: typeof DotwellKnownOauthAuthorizationServerIndexRoute
+  DotwellKnownOauthAuthorizationServerApiAuthRoute: typeof DotwellKnownOauthAuthorizationServerApiAuthRoute
+  DotwellKnownOauthProtectedResourceApiMcpRoute: typeof DotwellKnownOauthProtectedResourceApiMcpRoute
+  ApiAuthDotwellKnownOpenidConfigurationRoute: typeof ApiAuthDotwellKnownOpenidConfigurationRoute
+  ApiAuthOauth2ConsentRoute: typeof ApiAuthOauth2ConsentRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/mcp': {
-      id: '/mcp'
-      path: '/mcp'
-      fullPath: '/mcp'
-      preLoaderRoute: typeof McpRouteImport
+    '/sign-in': {
+      id: '/sign-in'
+      path: '/sign-in'
+      fullPath: '/sign-in'
+      preLoaderRoute: typeof SignInRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/consent': {
+      id: '/consent'
+      path: '/consent'
+      fullPath: '/consent'
+      preLoaderRoute: typeof ConsentRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -75,6 +200,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/mcp': {
+      id: '/api/mcp'
+      path: '/api/mcp'
+      fullPath: '/api/mcp'
+      preLoaderRoute: typeof ApiMcpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.well-known/oauth-authorization-server/': {
+      id: '/.well-known/oauth-authorization-server/'
+      path: '/.well-known/oauth-authorization-server'
+      fullPath: '/.well-known/oauth-authorization-server/'
+      preLoaderRoute: typeof DotwellKnownOauthAuthorizationServerIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/github-org-access': {
+      id: '/api/auth/github-org-access'
+      path: '/api/auth/github-org-access'
+      fullPath: '/api/auth/github-org-access'
+      preLoaderRoute: typeof ApiAuthGithubOrgAccessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -82,13 +228,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/auth/oauth2/consent': {
+      id: '/api/auth/oauth2/consent'
+      path: '/api/auth/oauth2/consent'
+      fullPath: '/api/auth/oauth2/consent'
+      preLoaderRoute: typeof ApiAuthOauth2ConsentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/.well-known/openid-configuration': {
+      id: '/api/auth/.well-known/openid-configuration'
+      path: '/api/auth/.well-known/openid-configuration'
+      fullPath: '/api/auth/.well-known/openid-configuration'
+      preLoaderRoute: typeof ApiAuthDotwellKnownOpenidConfigurationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.well-known/oauth-protected-resource/api/mcp': {
+      id: '/.well-known/oauth-protected-resource/api/mcp'
+      path: '/.well-known/oauth-protected-resource/api/mcp'
+      fullPath: '/.well-known/oauth-protected-resource/api/mcp'
+      preLoaderRoute: typeof DotwellKnownOauthProtectedResourceApiMcpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.well-known/oauth-authorization-server/api/auth': {
+      id: '/.well-known/oauth-authorization-server/api/auth'
+      path: '/.well-known/oauth-authorization-server/api/auth'
+      fullPath: '/.well-known/oauth-authorization-server/api/auth'
+      preLoaderRoute: typeof DotwellKnownOauthAuthorizationServerApiAuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  McpRoute: McpRoute,
+  ConsentRoute: ConsentRoute,
+  SignInRoute: SignInRoute,
+  ApiMcpRoute: ApiMcpRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiAuthGithubOrgAccessRoute: ApiAuthGithubOrgAccessRoute,
+  DotwellKnownOauthAuthorizationServerIndexRoute:
+    DotwellKnownOauthAuthorizationServerIndexRoute,
+  DotwellKnownOauthAuthorizationServerApiAuthRoute:
+    DotwellKnownOauthAuthorizationServerApiAuthRoute,
+  DotwellKnownOauthProtectedResourceApiMcpRoute:
+    DotwellKnownOauthProtectedResourceApiMcpRoute,
+  ApiAuthDotwellKnownOpenidConfigurationRoute:
+    ApiAuthDotwellKnownOpenidConfigurationRoute,
+  ApiAuthOauth2ConsentRoute: ApiAuthOauth2ConsentRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
