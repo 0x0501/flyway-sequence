@@ -1,6 +1,6 @@
 import { ClientOnly, createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-
+import { env } from "#/env.ts";
 import { authClient } from "#/lib/auth-client.ts";
 import { buildSignInRoute } from "#/lib/sign-in-flow.ts";
 
@@ -42,7 +42,7 @@ function Hero() {
 							<HeroCta />
 						</ClientOnly>
 						<a
-							href="https://github.com"
+							href={env.VITE_GITHUB_URL}
 							className="inline-flex h-11 items-center justify-center rounded-md px-4 text-sm font-medium text-[var(--ink-muted)] hover:text-[var(--ink)]"
 						>
 							View source
@@ -67,7 +67,7 @@ function HeroCta() {
 		return (
 			<Link
 				to="/sign-in"
-				className="inline-flex h-11 items-center justify-center rounded-md bg-[var(--accent)] px-5 text-sm font-medium text-[var(--accent-ink)] transition-opacity hover:opacity-90"
+				className="inline-flex h-11 items-center justify-center rounded-md bg-[var(--accent)] px-5 text-sm font-medium text-white! transition-opacity hover:opacity-90"
 			>
 				Open access
 			</Link>
@@ -128,7 +128,7 @@ const INSTALL_SNIPPETS: Record<
 		lang: "bash",
 		body: `claude mcp add --transport http \\
   flyway-sequence \\
-  https://YOUR_DEPLOYMENT/api/mcp`,
+  ${env.VITE_APP_URL}/api/mcp`,
 	},
 	codex: {
 		tabLabel: "Codex",
@@ -139,7 +139,7 @@ command = "npx"
 args = [
   "-y",
   "mcp-remote@latest",
-  "https://YOUR_DEPLOYMENT/api/mcp",
+  "${env.VITE_APP_URL}/api/mcp",
 ]`,
 	},
 };

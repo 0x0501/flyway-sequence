@@ -22,6 +22,8 @@ export const env = createEnv({
 
   client: {
     VITE_APP_TITLE: z.string().min(1).optional(),
+    VITE_GITHUB_URL: z.url().default('https://github.com'),
+    VITE_APP_URL: z.url().default('http://localhost:3000')
   },
 
   /**
