@@ -42,7 +42,7 @@ function Hero() {
 							<HeroCta />
 						</ClientOnly>
 						<a
-							href={env.VITE_GITHUB_URL}
+							href="https://github.com/0x0501/flyway-sequence"
 							className="inline-flex h-11 items-center justify-center rounded-md px-4 text-sm font-medium text-[var(--ink-muted)] hover:text-[var(--ink)]"
 						>
 							View source
