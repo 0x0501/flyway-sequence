@@ -15,7 +15,7 @@
     "check": "biome check",
     "deploy": "pnpm run build && wrangler deploy",
     "cf-typegen": "wrangler types",
-    "auth:generate": "pnpm dlx auth@latest generate --config ./src/lib/auth.ts --output ./src/db/auth.ts --adapter drizzle --dialect sqlite -y",
+    "auth:generate": "pnpm dlx auth@latest generate --config ./src/lib/auth.ts --output ./src/db/schema/auth.ts --adapter drizzle --dialect sqlite -y",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
@@ -23,6 +23,7 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
+    "@better-auth/oauth-provider": "^1.6.11",
     "@cloudflare/vite-plugin": "^1.26.0",
     "@heroui/react": "^3.1.0",
     "@heroui/styles": "^3.1.0",
@@ -49,6 +50,7 @@
     "@biomejs/biome": "2.4.5",
     "@tailwindcss/typography": "^0.5.16",
     "@tanstack/devtools-vite": "latest",
+    "@tanstack/router-cli": "^1.167.10",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/react": "^16.3.0",
     "@types/better-sqlite3": "^7.6.0",

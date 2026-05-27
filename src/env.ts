@@ -9,7 +9,9 @@ export const env = createEnv({
     CLOUDFLARE_ACCOUNT_ID: z.string().nonempty(),
     CLOUDFLARE_DATABASE_ID: z.string().nonempty(),
     CLOUDFLARE_D1_TOKEN: z.string().nonempty(),
-    GITHUB_ORGANIZATION: z.string().nonempty()
+    GITHUB_ORGANIZATION: z.string().nonempty(),
+    MCP_RESOURCE_URL: z.url().nonempty(),
+    BETTER_AUTH_URL: z.url().nonempty()
   },
 
   /**
