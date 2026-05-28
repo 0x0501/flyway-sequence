@@ -9,7 +9,7 @@ export const sequences = sqliteTable("sequences", {
 		.notNull()
 		.unique(),
 	sequence: integer("sequence", { mode: "number" }).default(1).notNull(),
-	lookedBy: text("locked_by", { mode: "text" }),
+	lockedBy: text("locked_by", { mode: "text" }),
 	createdAt: integer("created_at", { mode: "timestamp" }).default(
 		sql`(unixepoch())`,
 	),
