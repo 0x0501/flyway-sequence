@@ -1,5 +1,6 @@
 import { TanStackDevtools } from "@tanstack/react-devtools";
 import {
+	ClientOnly,
 	createRootRoute,
 	HeadContent,
 	Link,
@@ -8,6 +9,7 @@ import {
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 
 import BetterAuthHeader from "#/integrations/better-auth/header-user.tsx";
+import PoolNavLink from "#/integrations/better-auth/pool-nav-link.tsx";
 import appCss from "../styles.css?url";
 
 export const Route = createRootRoute({
@@ -85,6 +87,9 @@ function SiteHeader() {
 					<a href="#what" className="transition-colors hover:text-[var(--ink)]">
 						What it does
 					</a>
+					<ClientOnly>
+						<PoolNavLink />
+					</ClientOnly>
 					<a
 						href="https://github.com"
 						className="transition-colors hover:text-[var(--ink)]"
