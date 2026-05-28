@@ -45,6 +45,24 @@ export function padSequence(num: number) {
 	return String(num).padStart(3, "0");
 }
 
+export async function getCurrentSequenceHandler({
+	db,
+	date,
+}: SequenceServiceOptions) {
+	const sequenceDate = getDateKey(date);
+
+	const [row] = await db
+		.select()
+		.from(sequences)
+		.where(eq(sequences.sequenceDate, sequenceDate));
+
+	if (!row) {
+		throw new Error("Failed to get current sequence");
+	}
+
+	return row;
+}
+
 export async function getSequenceHandler({ db, date }: SequenceServiceOptions) {
 	const sequenceDate = getDateKey(date);
 

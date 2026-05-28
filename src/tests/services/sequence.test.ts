@@ -6,6 +6,7 @@ import type { DBClient } from "../../db/client.ts";
 import { sequences } from "../../db/schema/index.ts";
 import {
 	getCurrentFormattedTime,
+	getCurrentSequenceHandler,
 	getDateKey,
 	getSequenceHandler,
 	padSequence,
@@ -111,6 +112,37 @@ describe("sequence service", () => {
 				date: new Date("2026-05-28T01:02:03.000Z"),
 			}),
 		).rejects.toThrow("Failed to get sequence");
+	});
+
+	test("getCurrentSequenceHandler returns the stored sequence for the current day", async () => {
+		const { db, sqlite } = createSequenceDb();
+		const date = new Date("2026-05-28T01:02:03.000Z");
+
+		try {
+			await getSequenceHandler({ db, date });
+			await getSequenceHandler({ db, date });
+
+			const current = await getCurrentSequenceHandler({ db, date });
+
+			expect(current.sequenceDate).toBe(20260528);
+			expect(current.sequence).toBe(2);
+		} finally {
+			sqlite.close();
+		}
+	});
+
+	test("getCurrentSequenceHandler throws when the sequence is missing", async () => {
+		const where = vi.fn(async () => []);
+		const from = vi.fn(() => ({ where }));
+		const select = vi.fn(() => ({ from }));
+		const db = { select } as unknown as DBClient;
+
+		await expect(
+			getCurrentSequenceHandler({
+				db,
+				date: new Date("2026-05-28T01:02:03.000Z"),
+			}),
+		).rejects.toThrow("Failed to get current sequence");
 	});
 
 	test("rollbackSequenceHandler decrements an existing sequence above one", async () => {

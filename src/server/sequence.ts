@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { bearerMiddleware } from "#/middleware/bearer.ts";
 import { databaseMiddleware } from "#/middleware/database.ts";
 import {
+	getCurrentSequenceHandler,
 	getSequenceHandler,
 	padSequence,
 	rollbackSequenceHandler,
@@ -12,6 +13,29 @@ type SequenceResponse = {
 	sequence: string | null; // 001, 012, 123, .etc
 	message: string | null;
 };
+
+export const getSequence = createServerFn()
+	.middleware([bearerMiddleware, databaseMiddleware])
+	.handler(async ({ context }) => {
+		try {
+			const res = await getCurrentSequenceHandler({
+				db: context.db,
+				date: new Date(),
+			});
+			return {
+				success: true,
+				sequence: `${res.sequenceDate}_${padSequence(res.sequence)}__`,
+				message: null,
+			} satisfies SequenceResponse;
+		} catch (e) {
+			const error = e as Error;
+			return {
+				success: false,
+				sequence: null,
+				message: error.message,
+			} satisfies SequenceResponse;
+		}
+	});
 
 // Get the latest sequence + 1
 export const nextSequence = createServerFn()
