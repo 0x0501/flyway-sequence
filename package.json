@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "vite dev --port 3000",
-    "build": "vite build",
+    "build": "vite build --mode prod",
     "preview": "vite preview",
     "test": "vitest run --config vitest.config.ts",
     "format": "biome format",
