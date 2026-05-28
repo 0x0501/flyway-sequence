@@ -1,0 +1,1 @@
+ALTER TABLE `sequences` DROP COLUMN `locked_by`;
