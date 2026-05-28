@@ -25,7 +25,7 @@ export const nextSequence = createServerFn()
 
 			return {
 				success: true,
-				sequence: padSequence(res.sequence),
+				sequence: `${res.sequenceDate}_${padSequence(res.sequence)}__`,
 				message: null,
 			} satisfies SequenceResponse;
 		} catch (e) {
@@ -49,7 +49,7 @@ export const rollbackSequence = createServerFn()
 			});
 			return {
 				success: true,
-				sequence: padSequence(res.sequence),
+				sequence: `${res.sequenceDate}_${padSequence(res.sequence)}__`,
 				message: null,
 			} satisfies SequenceResponse;
 		} catch (e) {
