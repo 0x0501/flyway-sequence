@@ -2,7 +2,10 @@ import { ClientOnly, createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 
 import { authClient } from "#/lib/auth-client.ts";
-import { getAuthorizationResumePath } from "#/lib/sign-in-flow.ts";
+import {
+	getAuthorizationResumePath,
+	isAuthorizationRequest,
+} from "#/lib/sign-in-flow.ts";
 
 export const Route = createFileRoute("/sign-in")({
 	component: SignInRoute,
@@ -89,6 +92,16 @@ function SignInPanel() {
 		};
 	}, [session]);
 
+	useEffect(() => {
+		if (orgCheckState !== "authorized") {
+			return;
+		}
+		if (isAuthorizationRequest(searchParams)) {
+			return;
+		}
+		window.location.href = searchParams.get("returnTo") ?? "/pool";
+	}, [orgCheckState, searchParams]);
+
 	if (isPending) {
 		return <SignInShell state="loading" />;
 	}
@@ -146,7 +159,10 @@ function SignInPanel() {
 			) : null}
 
 			<div className="mt-7 flex flex-col gap-3 sm:flex-row sm:justify-end">
-				{session && orgCheckState === "authorized" && nextHref ? (
+				{session &&
+				orgCheckState === "authorized" &&
+				isAuthorizationRequest(searchParams) &&
+				nextHref ? (
 					<a
 						className="inline-flex h-11 items-center justify-center rounded-md bg-[var(--accent)] px-5 text-sm font-medium text-[var(--accent-ink)] transition-opacity hover:opacity-90 sm:w-auto"
 						href={nextHref}
