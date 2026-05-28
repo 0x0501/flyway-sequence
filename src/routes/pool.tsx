@@ -1,6 +1,6 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { buildSignInRoute } from "#/lib/sign-in-flow.ts";
 import { ensurePoolAccess } from "#/server/access.ts";
@@ -22,9 +22,20 @@ type PoolState =
 	| { status: "empty"; message: string | null }
 	| { status: "error"; message: string };
 
+function formatCheckedAt(date: Date) {
+	return date.toLocaleTimeString([], {
+		hour: "2-digit",
+		minute: "2-digit",
+		second: "2-digit",
+	});
+}
+
 function PoolRoute() {
 	const getSeq = useServerFn(getSequence);
 	const [state, setState] = useState<PoolState>({ status: "loading" });
+	const [checkedAt, setCheckedAt] = useState<string | null>(null);
+	const [copied, setCopied] = useState(false);
+	const copyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
 	const load = useCallback(async () => {
 		setState({ status: "loading" });
@@ -35,6 +46,7 @@ function PoolRoute() {
 			} else {
 				setState({ status: "empty", message: res.message });
 			}
+			setCheckedAt(formatCheckedAt(new Date()));
 		} catch (e) {
 			setState({ status: "error", message: (e as Error).message });
 		}
@@ -43,6 +55,30 @@ function PoolRoute() {
 	useEffect(() => {
 		void load();
 	}, [load]);
+
+	useEffect(() => {
+		return () => {
+			if (copyTimer.current) {
+				clearTimeout(copyTimer.current);
+			}
+		};
+	}, []);
+
+	const handleCopy = useCallback(async (value: string) => {
+		try {
+			await navigator.clipboard.writeText(value);
+			setCopied(true);
+			if (copyTimer.current) {
+				clearTimeout(copyTimer.current);
+			}
+			copyTimer.current = setTimeout(() => setCopied(false), 1500);
+		} catch {
+			// Clipboard unavailable (e.g. insecure context); the value stays
+			// selectable for manual copy.
+		}
+	}, []);
+
+	const isLoading = state.status === "loading";
 
 	return (
 		<div className="px-6 py-16 md:py-24">
@@ -55,20 +91,43 @@ function PoolRoute() {
 						</h1>
 						<p className="text-[15px] leading-relaxed text-[var(--ink-muted)]">
 							The latest centralized Flyway sequence allocated for today
-							(Asia/Shanghai).
+							(Asia/Shanghai). Copy it straight into your migration filename.
 						</p>
 					</div>
 
 					<div className="my-7 h-px bg-[var(--border)]" />
 
-					{state.status === "loading" ? (
-						<div className="h-12 w-full animate-pulse rounded-md bg-[var(--border)]" />
+					{isLoading ? (
+						<div className="space-y-3">
+							<div className="h-11 w-3/4 animate-pulse rounded-md bg-[var(--border)]" />
+							<div className="h-4 w-40 animate-pulse rounded bg-[var(--border)]" />
+						</div>
 					) : null}
 
 					{state.status === "ready" ? (
-						<p className="font-mono text-3xl font-semibold tracking-tight text-[var(--ink)] md:text-4xl">
-							{state.sequence}
-						</p>
+						<div className="space-y-5">
+							<p className="select-all break-all font-mono text-4xl font-semibold tracking-tight text-[var(--ink)] md:text-5xl">
+								{state.sequence}
+							</p>
+							<div className="flex items-center justify-between gap-4">
+								<span className="text-xs text-[var(--ink-subtle)]">
+									{checkedAt ? `Last checked ${checkedAt}` : null}
+								</span>
+								<button
+									type="button"
+									onClick={() => {
+										void handleCopy(state.sequence);
+									}}
+									className={`inline-flex h-8 items-center justify-center rounded-md border px-3 text-xs font-medium transition-colors active:translate-y-px ${
+										copied
+											? "border-[color:color-mix(in_oklab,var(--accent)_30%,transparent)] bg-[var(--accent-soft)] text-[var(--accent)]"
+											: "border-[var(--border-strong)] bg-[var(--bg-elevated)] text-[var(--ink)] hover:bg-[var(--bg)]"
+									}`}
+								>
+									{copied ? "Copied" : "Copy"}
+								</button>
+							</div>
+						</div>
 					) : null}
 
 					{state.status === "empty" ? (
@@ -94,13 +153,13 @@ function PoolRoute() {
 					<div className="mt-7 flex justify-end">
 						<button
 							type="button"
-							disabled={state.status === "loading"}
+							disabled={isLoading}
 							onClick={() => {
 								void load();
 							}}
-							className="inline-flex h-11 items-center justify-center rounded-md border border-[var(--border-strong)] bg-[var(--bg-elevated)] px-5 text-sm font-medium text-[var(--ink)] transition-colors hover:bg-[var(--bg)] disabled:opacity-50"
+							className="inline-flex h-11 items-center justify-center rounded-md border border-[var(--border-strong)] bg-[var(--bg-elevated)] px-5 text-sm font-medium text-[var(--ink)] transition-colors hover:bg-[var(--bg)] active:translate-y-px disabled:opacity-50"
 						>
-							Refresh
+							{isLoading ? "Loading" : "Refresh"}
 						</button>
 					</div>
 				</div>
