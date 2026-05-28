@@ -6,14 +6,17 @@ export function buildSignInRoute(returnTo: string) {
 	return `/sign-in?${params.toString()}`;
 }
 
-export function getAuthorizationResumePath(searchParams: URLSearchParams) {
-	const hasAuthorizationParams =
+export function isAuthorizationRequest(searchParams: URLSearchParams) {
+	return (
 		searchParams.has("client_id") &&
 		searchParams.has("redirect_uri") &&
 		searchParams.has("response_type") &&
-		searchParams.has("state");
+		searchParams.has("state")
+	);
+}
 
-	if (hasAuthorizationParams) {
+export function getAuthorizationResumePath(searchParams: URLSearchParams) {
+	if (isAuthorizationRequest(searchParams)) {
 		return `/api/auth/oauth2/authorize?${searchParams.toString()}`;
 	}
 
