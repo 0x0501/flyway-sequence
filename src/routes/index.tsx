@@ -1,5 +1,6 @@
 import { ClientOnly, createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { clientEnv } from "#/clientEnv.ts";
 import { env } from "#/env.ts";
 import { authClient } from "#/lib/auth-client.ts";
 import { buildSignInRoute } from "#/lib/sign-in-flow.ts";
@@ -126,7 +127,7 @@ const INSTALL_SNIPPETS: Record<
 		lang: "bash",
 		body: `claude mcp add --transport http \\
   flyway-sequence \\
-  ${env.VITE_APP_URL}/api/mcp`,
+  ${clientEnv.VITE_APP_URL}/api/mcp`,
 	},
 	codex: {
 		tabLabel: "Codex",
@@ -137,7 +138,7 @@ command = "npx"
 args = [
   "-y",
   "mcp-remote@latest",
-  "${env.VITE_APP_URL}/api/mcp",
+  "${clientEnv.VITE_APP_URL}/api/mcp",
 ]`,
 	},
 };
