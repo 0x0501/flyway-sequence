@@ -25,7 +25,7 @@ export const getSequence = createServerFn()
 			});
 			return {
 				success: true,
-				sequence: `${res.sequenceDate}_${padSequence(res.sequence)}__`,
+				sequence: `V${res.sequenceDate}_${padSequence(res.sequence)}__`,
 				message: null,
 			} satisfies SequenceResponse;
 		} catch (e) {
@@ -50,7 +50,7 @@ export const nextSequence = createServerFn()
 
 			return {
 				success: true,
-				sequence: `${res.sequenceDate}_${padSequence(res.sequence)}__`,
+				sequence: `V${res.sequenceDate}_${padSequence(res.sequence)}__`,
 				message: null,
 			} satisfies SequenceResponse;
 		} catch (e) {
@@ -74,7 +74,7 @@ export const rollbackSequence = createServerFn()
 			});
 			return {
 				success: true,
-				sequence: `${res.sequenceDate}_${padSequence(res.sequence)}__`,
+				sequence: `V${res.sequenceDate}_${padSequence(res.sequence)}__`,
 				message: null,
 			} satisfies SequenceResponse;
 		} catch (e) {
