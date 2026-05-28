@@ -103,12 +103,10 @@ function HeroCtaSkeleton() {
 
 function HeroMascot() {
 	return (
-		<div className="ml-auto flex aspect-[655/990] w-full max-w-[220px] items-end justify-center lg:max-w-[260px]">
+		<div className="ml-auto flex aspect-[655/990] w-full max-w-[320px] items-end justify-center lg:max-w-[320px]">
 			<img
 				src="/mascot.png"
-				alt="Flyway Sequence mascot, a green dinosaur"
-				width={655}
-				height={990}
+				alt="Flyway Sequence mascot, a cart"
 				className="h-full w-full object-contain"
 				loading="eager"
 			/>

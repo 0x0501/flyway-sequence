@@ -76,7 +76,6 @@ function SiteHeader() {
 					to="/"
 					className="flex items-center gap-2.5 text-[15px] font-medium tracking-tight text-[var(--ink)]"
 				>
-					<BrandMark />
 					<span>Flyway Sequence</span>
 				</Link>
 				<nav className="hidden items-center gap-7 text-sm text-[var(--ink-muted)] md:flex">
@@ -104,7 +103,6 @@ function SiteFooter() {
 		<footer className="border-t border-[var(--border)]">
 			<div className="mx-auto flex max-w-6xl flex-col gap-4 px-6 py-8 text-sm text-[var(--ink-subtle)] sm:flex-row sm:items-center sm:justify-between">
 				<div className="flex items-center gap-2.5">
-					<BrandMark />
 					<span>Flyway Sequence</span>
 				</div>
 				<div className="flex items-center gap-6">
