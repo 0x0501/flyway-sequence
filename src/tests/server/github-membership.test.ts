@@ -1,5 +1,4 @@
-import assert from "node:assert/strict";
-import test from "node:test";
+import { expect, test } from "vitest";
 
 import { parseGithubMembershipResponse } from "../../server/github-membership.ts";
 
@@ -38,5 +37,5 @@ test("parseGithubMembershipResponse returns true for active membership", async (
 
 	const isMember = await parseGithubMembershipResponse(response);
 
-	assert.equal(isMember, true);
+	expect(isMember).toBe(true);
 });

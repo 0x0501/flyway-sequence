@@ -1,5 +1,4 @@
-import assert from "node:assert/strict";
-import test from "node:test";
+import { expect, test } from "vitest";
 
 import {
 	type GithubOrgAccessDependencies,
@@ -34,7 +33,7 @@ test("verifyGithubOrgAccess returns unauthorized when session is missing", async
 		}),
 	);
 
-	assert.deepEqual(result, {
+	expect(result).toEqual({
 		ok: false,
 		status: 401,
 		code: "UNAUTHENTICATED",
@@ -49,7 +48,7 @@ test("verifyGithubOrgAccess returns forbidden when GitHub token is missing", asy
 		}),
 	);
 
-	assert.deepEqual(result, {
+	expect(result).toEqual({
 		ok: false,
 		status: 403,
 		code: "MISSING_GITHUB_ACCESS_TOKEN",
@@ -65,7 +64,7 @@ test("verifyGithubOrgAccess returns forbidden when user is outside the org", asy
 		}),
 	);
 
-	assert.deepEqual(result, {
+	expect(result).toEqual({
 		ok: false,
 		status: 403,
 		code: "NOT_ORG_MEMBER",
@@ -76,12 +75,12 @@ test("verifyGithubOrgAccess returns forbidden when user is outside the org", asy
 test("verifyGithubOrgAccess returns success for organization members", async () => {
 	const result = await verifyGithubOrgAccess(createDependencies());
 
-	assert.equal(result.ok, true);
+	expect(result.ok).toBe(true);
 
 	if (!result.ok) {
 		throw new Error("expected an authorized result");
 	}
 
-	assert.equal(result.githubAccessToken, "github-token");
-	assert.equal(result.session.user.id, "user_123");
+	expect(result.githubAccessToken).toBe("github-token");
+	expect(result.session.user.id).toBe("user_123");
 });

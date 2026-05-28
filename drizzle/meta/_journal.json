@@ -15,6 +15,20 @@
       "when": 1779864028656,
       "tag": "0001_absent_callisto",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1779940080016,
+      "tag": "0002_flaky_kabuki",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1779948013814,
+      "tag": "0003_secret_blink",
+      "breakpoints": true
     }
   ]
 }

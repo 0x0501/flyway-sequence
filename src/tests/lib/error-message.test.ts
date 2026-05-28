@@ -1,10 +1,9 @@
-import assert from "node:assert/strict";
-import test from "node:test";
+import { expect, test } from "vitest";
 
 import { getErrorMessage } from "../../lib/error-message.ts";
 
 test("getErrorMessage prefers a top-level response payload message", () => {
-	assert.equal(
+	expect(
 		getErrorMessage(
 			{
 				data: {
@@ -14,12 +13,11 @@ test("getErrorMessage prefers a top-level response payload message", () => {
 			},
 			"fallback",
 		),
-		"Only GitHub organization members can authorize MCP access.",
-	);
+	).toBe("Only GitHub organization members can authorize MCP access.");
 });
 
 test("getErrorMessage falls back to nested error message", () => {
-	assert.equal(
+	expect(
 		getErrorMessage(
 			{
 				error: {
@@ -28,10 +26,9 @@ test("getErrorMessage falls back to nested error message", () => {
 			},
 			"fallback",
 		),
-		"Forbidden",
-	);
+	).toBe("Forbidden");
 });
 
 test("getErrorMessage returns fallback when there is no usable message", () => {
-	assert.equal(getErrorMessage({}, "fallback"), "fallback");
+	expect(getErrorMessage({}, "fallback")).toBe("fallback");
 });
