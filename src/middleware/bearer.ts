@@ -1,8 +1,9 @@
 import { createMiddleware } from "@tanstack/react-start";
 import type { JWTPayload } from "better-auth";
+import { verifyJwsAccessToken } from "better-auth/oauth2";
 import { env } from "#/env.ts";
 import { getAuthIssuer } from "#/lib/oauth-urls.ts";
-import { serverClient } from "#/lib/server-client.ts";
+import { betterAuthMiddleware } from "./better-auth.ts";
 
 const authIssuer = getAuthIssuer(env.BETTER_AUTH_URL);
 
@@ -16,8 +17,9 @@ function unauthorized() {
 	});
 }
 
-export const bearerMiddleware = createMiddleware().server(
-	async ({ next, request }) => {
+export const bearerMiddleware = createMiddleware()
+	.middleware([betterAuthMiddleware])
+	.server(async ({ next, request, context }) => {
 		const header = request.headers.get("authorization");
 
 		if (!header?.startsWith("Bearer ")) {
@@ -29,15 +31,24 @@ export const bearerMiddleware = createMiddleware().server(
 		let payload: JWTPayload;
 
 		try {
-			payload = await serverClient.verifyAccessToken(token, {
+			// Verify locally with keys read from the same D1 the auth server uses.
+			// A Worker cannot fetch its own custom domain, so a remote jwksUrl
+			// (createRemoteJWKSet) self-loopback fails — read the JWKS in-process.
+
+			payload = await verifyJwsAccessToken(token, {
+				jwksFetch: () => context.auth.api.getJwks(),
 				verifyOptions: {
 					issuer: authIssuer,
 					audience: env.MCP_RESOURCE_URL,
 				},
-				jwksUrl: `${authIssuer}/jwks`,
-				scopes: ["mcp:write"],
 			});
-		} catch {
+		} catch (error) {
+			console.error("MCP bearer auth: verifyAccessToken failed", error);
+			return unauthorized();
+		}
+
+		const scopes = new Set((payload.scope as string | undefined)?.split(" "));
+		if (!scopes.has("mcp:write")) {
 			return unauthorized();
 		}
 
@@ -47,5 +58,4 @@ export const bearerMiddleware = createMiddleware().server(
 				accessTokenPayload: payload,
 			},
 		});
-	},
-);
+	});

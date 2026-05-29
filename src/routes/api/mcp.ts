@@ -16,6 +16,7 @@ server.registerTool(
 		title: "Allocate next Flyway migration version",
 		description:
 			"Allocates the next centralized Flyway migration version for today's Shanghai date. Call this exactly once for each migration file that will be created. Combine the returned sequenceDate and sequence with the user-provided short_desc to create filenames like V20260501_001__add_order_table.sql. The sequence is centralized and atomic; do not manually calculate or reuse sequence numbers.",
+			inputSchema: {}
 	},
 	async () => {
 		const sequence = await nextSequence();
@@ -48,7 +49,9 @@ server.registerTool(
 	{
 		title: "Rollback explicit Flyway migration version removal",
 		description: "Decrements today's centralized Flyway migration sequence by 1 only when the user explicitly requests to delete,撤回, rollback, or remove a previously allocated migration file/version. Never call this automatically after a generation failure, validation failure, or abandoned draft. Do not use this tool unless the user clearly instructs that a migration file/version should be removed or reverted.",
+		inputSchema: {}
 	},
+
 	async () => {
 		const sequence = await rollbackSequence();
 
