@@ -1,0 +1,3 @@
+[submodule "flyway-skill"]
+	path = flyway-skill
+	url = https://github.com/ZDHL-Amazing/skills.git
