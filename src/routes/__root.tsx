@@ -113,43 +113,12 @@ function SiteFooter() {
 				<div className="flex items-center gap-6">
 					<a
 						className="hover:text-[var(--ink)]"
-						href="/.well-known/oauth-authorization-server"
+						href="/.well-known/oauth-authorization-server/api/auth"
 					>
 						OAuth metadata
 					</a>
 				</div>
 			</div>
 		</footer>
-	);
-}
-
-function BrandMark() {
-	return (
-		<svg
-			aria-hidden="true"
-			width="22"
-			height="22"
-			viewBox="0 0 22 22"
-			fill="none"
-			className="text-[var(--accent)]"
-		>
-			<title>Flyway Sequence</title>
-			<rect
-				x="1"
-				y="1"
-				width="20"
-				height="20"
-				rx="5"
-				stroke="currentColor"
-				strokeWidth="1.5"
-			/>
-			<path
-				d="M6 13.5 9 10.5 12 12.5 16 8"
-				stroke="currentColor"
-				strokeWidth="1.5"
-				strokeLinecap="round"
-				strokeLinejoin="round"
-			/>
-		</svg>
 	);
 }

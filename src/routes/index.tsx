@@ -1,7 +1,6 @@
 import { ClientOnly, createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { clientEnv } from "#/clientEnv.ts";
-import { env } from "#/env.ts";
 import { authClient } from "#/lib/auth-client.ts";
 import { buildSignInRoute } from "#/lib/sign-in-flow.ts";
 
@@ -79,7 +78,6 @@ function HeroCta() {
 		await authClient.signIn.social({
 			provider: "github",
 			callbackURL: `${window.location.origin}${buildSignInRoute("/")}`,
-			scopes: ["user:email", "read:org"],
 		});
 	}
 
@@ -123,23 +121,17 @@ const INSTALL_SNIPPETS: Record<
 > = {
 	"claude-code": {
 		tabLabel: "Claude Code",
-		hint: "Run in your terminal",
+		hint: "Register http://localhost:8080/callback as a native client, then replace YOUR_CLIENT_ID",
 		lang: "bash",
-		body: `claude mcp add --transport http \\
-  flyway-sequence \\
-  ${clientEnv.VITE_APP_URL}/api/mcp`,
+		body: `claude mcp add --transport http --client-id YOUR_CLIENT_ID --callback-port 8080 \\
+  flyway-sequence ${clientEnv.VITE_APP_URL}/api/mcp`,
 	},
 	codex: {
 		tabLabel: "Codex",
-		hint: "Add to ~/.codex/config.toml",
-		lang: "toml",
-		body: `[mcp_servers.flyway-sequence]
-command = "npx"
-args = [
-  "-y",
-  "mcp-remote@latest",
-  "${clientEnv.VITE_APP_URL}/api/mcp",
-]`,
+		hint: "Register http://127.0.0.1/callback as a native client, then replace YOUR_CLIENT_ID",
+		lang: "bash",
+		body: `codex mcp add flyway-sequence --url ${clientEnv.VITE_APP_URL}/api/mcp --oauth-client-id YOUR_CLIENT_ID
+codex mcp login flyway-sequence --scopes openid,profile,email,offline_access,mcp:write`,
 	},
 };
 
@@ -152,8 +144,8 @@ function InstallSection() {
 						Install in your MCP client
 					</h2>
 					<p className="mt-3 text-[15px] leading-relaxed text-[var(--ink-muted)]">
-						Pick the tool you use, paste one snippet, restart the client. The
-						flyway-sequence tool shows up alongside your built-in ones.
+						Register the application once on the Clients page, then use its
+						client ID below. Your client must support MCP 2026-07-28.
 					</p>
 				</div>
 
@@ -167,17 +159,10 @@ function InstallSection() {
 
 function InstallCard() {
 	const [target, setTarget] = useState<InstallTarget>("claude-code");
-	const [origin, setOrigin] = useState<string | null>(null);
 	const [copied, setCopied] = useState(false);
 
-	useEffect(() => {
-		setOrigin(window.location.origin);
-	}, []);
-
 	const snippet = INSTALL_SNIPPETS[target];
-	const body = origin
-		? snippet.body.replaceAll("https://YOUR_DEPLOYMENT", origin)
-		: snippet.body;
+	const body = snippet.body;
 
 	async function handleCopy() {
 		try {
@@ -268,11 +253,11 @@ function HowItWorks() {
 		},
 		{
 			title: "Point your client",
-			body: "Connect any Model Context Protocol client, IDE plugin, or CI runner to the MCP endpoint over OAuth 2.0.",
+			body: "Connect an MCP 2026-07-28 client to the MCP endpoint over OAuth 2.1.",
 		},
 		{
 			title: "Take the next number",
-			body: "Call the sequencer tool. The server returns an atomic sequence value and records who took it.",
+			body: "Call the sequencer tool. The server returns an atomic sequence value for the Shanghai calendar date.",
 		},
 	];
 
@@ -311,7 +296,7 @@ function Capabilities() {
 						Small surface. Sharp guarantees.
 					</h2>
 					<p className="mt-4 max-w-[36ch] text-[15px] leading-relaxed text-[var(--ink-muted)]">
-						The whole thing is one Cloudflare Worker, one D1 table, and one
+						The whole thing is one Cloudflare Worker, one D1 database, and one
 						OAuth flow. Read the code in an afternoon.
 					</p>
 				</div>
@@ -323,15 +308,15 @@ function Capabilities() {
 					/>
 					<Capability
 						title="GitHub org gated"
-						body="Tokens issue only to members of an org you control. Membership is re-checked on every sign-in."
+						body="Tokens issue only to members of an org you control. Successful membership checks are cached for 10 minutes."
 					/>
 					<Capability
 						title="MCP native"
-						body="Exposes the sequencer as a Model Context Protocol tool, so any MCP-aware client can pick the next number."
+						body="Exposes the sequencer as a Model Context Protocol tool, so registered clients can allocate migration numbers."
 						visual={<McpVisual />}
 					/>
 					<Capability
-						title="OAuth 2.0 standard"
+						title="OAuth 2.1 with PKCE"
 						body="Standards-compliant authorization, consent, and token endpoints. No bespoke session glue to maintain."
 					/>
 				</div>
@@ -377,7 +362,7 @@ function AtomicCounterVisual() {
 function McpVisual() {
 	return (
 		<div className="flex flex-wrap gap-1.5 font-mono text-[11px]">
-			{["tools/list", "tools/call", "sequencer.next"].map((label) => (
+			{["tools/list", "tools/call", "next_sequence"].map((label) => (
 				<span
 					key={label}
 					className="rounded border border-[var(--border-strong)] bg-[var(--bg-elevated)] px-2 py-0.5 text-[var(--ink-muted)]"

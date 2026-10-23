@@ -1,5 +1,4 @@
 import { createServerFn } from "@tanstack/react-start";
-import { databaseMiddleware } from "#/middleware/database.ts";
 import { protectedMiddleware } from "#/middleware/protected.ts";
 import { getCurrentSequenceHandler, padSequence } from "#/services/sequence.ts";
 
@@ -10,7 +9,7 @@ export type SequenceResponse = {
 };
 
 export const getSequence = createServerFn()
-	.middleware([protectedMiddleware, databaseMiddleware])
+	.middleware([protectedMiddleware])
 	.handler(async ({ context }) => {
 		try {
 			const res = await getCurrentSequenceHandler({

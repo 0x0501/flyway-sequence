@@ -6,4 +6,3 @@ export function createDatabaseClient(db: D1Database) {
 }
 
 export type DBClient = ReturnType<typeof createDatabaseClient>;
-export type DBTx = DBClient['transaction'];

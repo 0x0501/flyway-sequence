@@ -20,5 +20,10 @@ export function getAuthorizationResumePath(searchParams: URLSearchParams) {
 		return `/api/auth/oauth2/authorize?${searchParams.toString()}`;
 	}
 
-	return searchParams.get("returnTo");
+	const returnTo = searchParams.get("returnTo");
+	return returnTo?.startsWith("/") &&
+		!returnTo.startsWith("//") &&
+		!returnTo.includes("\\")
+		? returnTo
+		: null;
 }

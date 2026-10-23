@@ -1,14 +1,14 @@
 import { createMiddleware } from "@tanstack/react-start";
-import type { Auth } from "better-auth";
 import { env } from "#/env.ts";
-import { verifyGithubOrgAccessForHeaders } from "#/server/mcp-access.ts";
+import { verifyOrgAccess } from "#/server/org-access.ts";
 import { betterAuthMiddleware } from "./better-auth";
 
 export const protectedMiddleware = createMiddleware()
 	.middleware([betterAuthMiddleware])
 	.server(async ({ next, context, request }) => {
-		const result = await verifyGithubOrgAccessForHeaders(
-			context.auth as unknown as Auth,
+		const result = await verifyOrgAccess(
+			context.auth,
+			context.db,
 			request.headers,
 			env.GITHUB_ORGANIZATION,
 		);

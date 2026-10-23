@@ -73,3 +73,12 @@ describe("getAuthorizationResumePath", () => {
 		expect(getAuthorizationResumePath(new URLSearchParams())).toBeNull();
 	});
 });
+
+test.each(["https://evil.example", "//evil.example", "/\\evil.example"])(
+	"ignores external return targets: %s",
+	(returnTo) => {
+		expect(
+			getAuthorizationResumePath(new URLSearchParams({ returnTo })),
+		).toBeNull();
+	},
+);
