@@ -43,7 +43,7 @@ export function createSequenceMcpServer(dependencies: SequenceMcpDependencies) {
 				openWorldHint: false,
 			},
 			description:
-				"Decrements today's centralized Flyway migration sequence by 1 only when the user explicitly requests to delete,撤回, rollback, or remove a previously allocated migration file/version. Never call this automatically after a generation failure, validation failure, or abandoned draft. Do not use this tool unless the user clearly instructs that a migration file/version should be removed or reverted.",
+				"Decrements today's centralized Flyway migration sequence by 1 only when the user explicitly requests to delete, retract, rollback, or remove a previously allocated migration file/version. Never call this automatically after a generation failure, validation failure, or abandoned draft. Do not use this tool unless the user clearly instructs that a migration file/version should be removed or reverted.",
 		},
 		async () => toolResult(await dependencies.rollbackLatestSequence()),
 	);
