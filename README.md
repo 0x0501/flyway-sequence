@@ -92,7 +92,9 @@ codex mcp add flyway-sequence --url https://YOUR_DEPLOYMENT/api/mcp --oauth-clie
 codex mcp login flyway-sequence --scopes openid,profile,email,offline_access,mcp:write
 ```
 
-Use a client version that supports MCP `2026-07-28`. See the
+Clients can use Streamable HTTP with MCP `2025-03-26`, `2025-06-18`,
+`2025-11-25`, or `2026-07-28`. Existing 2025 clients do not need to upgrade
+solely to negotiate the 2026 protocol. See the
 [Claude Code documentation](https://code.claude.com/docs/en/mcp#use-pre-configured-oauth-credentials)
 and [Codex documentation](https://learn.chatgpt.com/docs/extend/mcp?surface=cli) for configuration details.
 For existing users, share the [agent upgrade instruction](docs/upgrade-mcp-client.md).
@@ -101,7 +103,12 @@ For existing users, share the [agent upgrade instruction](docs/upgrade-mcp-clien
 
 - `/api/mcp` accepts POST requests only. It uses `createMcpHandler` from the official
   `@modelcontextprotocol/server` v2 SDK, creates a separate server for each request, and sets
-  `legacy: "reject"`.
+  `legacy: "stateless"`. The same endpoint accepts the 2025 `initialize`
+  handshake and modern 2026 requests. Legacy requests need no modern `_meta`
+  envelope or `Mcp-Method` header. Both paths use the same tools and authentication.
+- Legacy compatibility uses stateless Streamable HTTP. No session is issued or
+  retained between requests. Standalone SSE `GET`, session `DELETE`, and the old
+  HTTP+SSE `/sse` + `/messages` transport are not provided.
 - `next_sequence` allocates versions atomically. `rollback_sequence` is reserved for cases
   where the user explicitly asks to retract a version. Both require `mcp:write`.
 - `@better-auth/mcp` handles OAuth 2.1, PKCE, consent, resource binding, and discovery metadata.
@@ -156,7 +163,9 @@ bun run test
 bun run build
 ```
 
-Tests cover the OAuth authorization code flow with PKCE, token lifetimes, public key caching,
+Tests cover 2025 protocol initialization and tool calls across all three supported
+2025 revisions, modern 2026 client calls, the OAuth authorization code flow with
+PKCE, token lifetimes, public key caching,
 organization membership caching, personal token hashing, owner isolation, expiration,
 revocation, official MCP client calls with OAuth and Bearer credentials, and preservation of existing data
 during database migrations.

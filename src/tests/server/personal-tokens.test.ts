@@ -270,50 +270,60 @@ test("revocation during an organization check blocks the pending request", async
 	expect((await listPersonalTokens(db, "member"))[0].lastUsedAt).toBeNull();
 });
 
-test("official MCP client calls tools using a personal Bearer token and is rejected after revocation", async () => {
-	const { db, auth } = setup();
-	const { token, metadata } = await createPersonalToken(db, "member", {
-		name: "SDK",
-		expiresInDays: 365,
-	});
-	const allocate = vi.fn(async () => ({
-		success: true,
-		sequence: "V20261113_001__",
-		message: null,
-	}));
-	const handler = createMcpRequestHandler(
-		() =>
-			createSequenceMcpServer({
-				allocateNextSequence: allocate,
-				rollbackLatestSequence: allocate,
-			}),
-		endpoint,
-	);
-	const client = new Client(
-		{ name: "bearer-integration", version: "1.0.0" },
-		{ versionNegotiation: { mode: { pin: "2026-07-28" } } },
-	);
-	const transport = new StreamableHTTPClientTransport(new URL(endpoint), {
-		requestInit: { headers: { authorization: `Bearer ${token}` } },
-		fetch: async (url, init) => {
-			const incoming = new Request(url, init);
-			incoming.headers.set("host", new URL(incoming.url).host);
-			const access = await authenticateMcpRequest(incoming, auth, db);
-			return access.ok
-				? handler(incoming, { authInfo: access.authInfo })
-				: access.response;
-		},
-	});
-	try {
-		await client.connect(transport);
-		expect((await client.listTools()).tools).toHaveLength(2);
-		const result = await client.callTool({ name: "next_sequence" });
-		expect(result.isError).not.toBe(true);
-		expect(allocate).toHaveBeenCalledTimes(1);
-		await revokePersonalToken(db, "member", metadata.id);
-		await expect(client.callTool({ name: "next_sequence" })).rejects.toThrow();
-		expect(allocate).toHaveBeenCalledTimes(1);
-	} finally {
-		await client.close();
-	}
-});
+test.each(["legacy", "modern"] as const)(
+	"official %s MCP client uses a personal Bearer token and is rejected after revocation",
+	async (era) => {
+		const { db, auth } = setup();
+		const { token, metadata } = await createPersonalToken(db, "member", {
+			name: "SDK",
+			expiresInDays: 365,
+		});
+		const allocate = vi.fn(async () => ({
+			success: true,
+			sequence: "V20261113_001__",
+			message: null,
+		}));
+		const handler = createMcpRequestHandler(
+			() =>
+				createSequenceMcpServer({
+					allocateNextSequence: allocate,
+					rollbackLatestSequence: allocate,
+				}),
+			endpoint,
+		);
+		const client = new Client(
+			{ name: "bearer-integration", version: "1.0.0" },
+			{
+				versionNegotiation: {
+					mode: era === "legacy" ? "legacy" : { pin: "2026-07-28" },
+				},
+			},
+		);
+		const transport = new StreamableHTTPClientTransport(new URL(endpoint), {
+			requestInit: { headers: { authorization: `Bearer ${token}` } },
+			fetch: async (url, init) => {
+				const incoming = new Request(url, init);
+				incoming.headers.set("host", new URL(incoming.url).host);
+				const access = await authenticateMcpRequest(incoming, auth, db);
+				return access.ok
+					? handler(incoming, { authInfo: access.authInfo })
+					: access.response;
+			},
+		});
+		try {
+			await client.connect(transport);
+			expect(client.getProtocolEra()).toBe(era);
+			expect((await client.listTools()).tools).toHaveLength(2);
+			const result = await client.callTool({ name: "next_sequence" });
+			expect(result.isError).not.toBe(true);
+			expect(allocate).toHaveBeenCalledTimes(1);
+			await revokePersonalToken(db, "member", metadata.id);
+			await expect(
+				client.callTool({ name: "next_sequence" }),
+			).rejects.toThrow();
+			expect(allocate).toHaveBeenCalledTimes(1);
+		} finally {
+			await client.close();
+		}
+	},
+);

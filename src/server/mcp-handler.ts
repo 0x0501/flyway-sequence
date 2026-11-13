@@ -10,7 +10,7 @@ export function createMcpRequestHandler(
 	factory: McpServerFactory,
 	resourceUrl: string,
 ) {
-	const handler = createMcpHandler(factory, { legacy: "reject" });
+	const handler = createMcpHandler(factory, { legacy: "stateless" });
 	const hostnames = [new URL(resourceUrl).hostname];
 	return (request: Request, options?: McpHandlerRequestOptions) => {
 		const rejected =

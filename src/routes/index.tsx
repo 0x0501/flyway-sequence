@@ -146,8 +146,8 @@ function InstallSection() {
 					</h2>
 					<p className="mt-3 text-[15px] leading-relaxed text-[var(--ink-muted)]">
 						Choose OAuth with a registered client, or create a personal token on
-						the Tokens page for Bearer auth. Your client must support MCP
-						2026-07-28.
+						the Tokens page for Bearer auth. Supports Streamable HTTP clients
+						using MCP 2025 or 2026 protocols.
 					</p>
 				</div>
 
@@ -281,7 +281,7 @@ function HowItWorks() {
 		},
 		{
 			title: "Point your client",
-			body: "Connect an MCP 2026-07-28 client to the MCP endpoint over OAuth 2.1.",
+			body: "Connect an MCP 2025 or 2026 Streamable HTTP client using OAuth 2.1 or a personal Bearer token.",
 		},
 		{
 			title: "Take the next number",

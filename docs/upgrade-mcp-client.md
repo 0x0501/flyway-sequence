@@ -9,9 +9,11 @@ Upgrade my existing `flyway-sequence` MCP connection to the current service at
 the connection, asking me only for missing client IDs or interactive sign-in steps.
 
 1. Identify my MCP application, installed version, configuration file, and configuration
-   scope. Check the installed CLI help before running commands. Upgrade the application
-   if it cannot negotiate MCP revision `2026-07-28`. For Claude Code, use version
-   `2.1.274` or newer and restart it after upgrading.
+   scope. Check the installed CLI help before running commands. The service supports
+   Streamable HTTP with MCP revisions `2025-03-26`, `2025-06-18`, `2025-11-25`,
+   and `2026-07-28`. Keep an existing 2025 client if it supports Streamable HTTP
+   and the required authentication. Upgrade only if those capabilities are missing,
+   and restart the application after upgrading. No standalone SSE session is required.
 
 2. Obtain a pre-registered public OAuth client ID for this application. Reuse the team's
    registration when available: registration is per application, not per user. If no
