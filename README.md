@@ -20,7 +20,50 @@ Set the GitHub OAuth App callback URL to `http://localhost:3000/api/auth/callbac
 Use the corresponding deployment domain in production. GitHub sign-in requests `read:org`;
 only active members of the configured organization can access protected features.
 
-## Register MCP clients
+## Choose an authentication method
+
+MCP clients can use either OAuth or a personal Bearer token. Both methods call
+`/api/mcp` and grant `mcp:write` access to the sequence tools.
+
+### Personal Bearer tokens
+
+1. Sign in to the website with your GitHub organization member account.
+2. Open **Tokens** (`/tokens`), enter a name, and choose an expiration of 30, 90,
+   180, or 365 days. The default is 90 days.
+3. Copy the token immediately. The full token is shown only once; the database
+   stores a SHA-256 hash and a short identifying prefix.
+4. Configure your client to send `Authorization: Bearer YOUR_PERSONAL_TOKEN`.
+   Bearer tokens do not require client registration or an OAuth login.
+
+For Claude Code:
+
+```bash
+claude mcp add --transport http flyway-sequence https://YOUR_DEPLOYMENT/api/mcp \
+  --header "Authorization: Bearer YOUR_PERSONAL_TOKEN"
+```
+
+For Codex:
+
+```bash
+export FLYWAY_SEQUENCE_TOKEN='YOUR_PERSONAL_TOKEN'
+codex mcp add flyway-sequence --url https://YOUR_DEPLOYMENT/api/mcp \
+  --bearer-token-env-var FLYWAY_SEQUENCE_TOKEN
+```
+
+Keep the token private. Make the environment variable available whenever starting
+Codex. If the server is already configured with OAuth, remove its existing client
+configuration before adding it with Bearer auth. The home page's installation
+examples include a selector for both methods.
+
+The Tokens page lists only the current user's tokens, with expiration and last-use
+times. Tokens can be revoked there; subsequent requests are rejected immediately.
+Expired and revoked tokens remain visible for reference. Personal tokens require
+the owner's GitHub organization membership, checked with the existing 10-minute
+membership cache. They continue working after the browser session ends, until
+expiration or revocation. A missing linked account or invalid GitHub credentials
+blocks access once the membership cache expires.
+
+### Register OAuth MCP clients
 
 1. Sign in with an organization member account and open `/clients`.
 2. Enter the application name, application type, and exact callback URIs supplied by the
@@ -63,18 +106,23 @@ For existing users, share the [agent upgrade instruction](docs/upgrade-mcp-clien
   where the user explicitly asks to retract a version. Both require `mcp:write`.
 - `@better-auth/mcp` handles OAuth 2.1, PKCE, consent, resource binding, and discovery metadata.
   Clients must be registered in advance. DCR is disabled, and CIMD is not installed.
-- MCP requests validate the signature, issuer, audience, expiration, scope, and DPoP binding.
+- OAuth MCP requests validate the signature, issuer, audience, expiration, scope, and DPoP binding.
   Better Auth's verification functions read local JWKS directly and use the library's public
   key cache, avoiding requests from a Worker to its own domain.
+- Personal Bearer tokens are opaque credentials with 256 bits of randomness. MCP
+  requests check their hash, expiration, revocation, and owner's organization
+  access in D1. They grant only `mcp:write` on the MCP endpoint and cannot
+  authenticate browser sessions or manage tokens.
 - GitHub organization checks run during OAuth authorization and consent, client management,
-  and protected Pool operations. Successful results are cached per user and organization for
+  protected Pool operations, and personal token management and usage. Successful results are cached per user and organization for
   10 minutes in D1, across Worker instances. Failed checks do not extend the cache.
-- Browser sessions use Better Auth's signed cookie cache for 10 minutes. MCP tool requests
-  use access tokens without repeating GitHub or browser session checks.
+- Browser sessions use Better Auth's signed cookie cache for 10 minutes. OAuth MCP
+  requests use access tokens without repeating GitHub or browser session checks.
 
 | Credential | Lifetime |
 | --- | --- |
 | OAuth access token | 24 hours |
+| Personal Bearer token | 30, 90 (default), 180, or 365 days; immediately revocable |
 | OIDC ID token | 24 hours |
 | Login session | 30 days, renewed on Better Auth's default update schedule |
 | OAuth refresh token | 180 days, reissued on rotation |
@@ -109,7 +157,8 @@ bun run build
 ```
 
 Tests cover the OAuth authorization code flow with PKCE, token lifetimes, public key caching,
-organization membership caching, official MCP client calls, and preservation of existing data
+organization membership caching, personal token hashing, owner isolation, expiration,
+revocation, official MCP client calls with OAuth and Bearer credentials, and preservation of existing data
 during database migrations.
 
 ## Database migrations and deployment
@@ -117,6 +166,8 @@ during database migrations.
 `0004_better_auth_1_7.sql` upgrades the OAuth schema and migrates client types and authentication
 methods before removing the old columns. `0005_org_membership_cache.sql` adds the organization
 membership cache. Published migration history is retained so existing databases can be upgraded.
+`0006_personal_tokens.sql` adds the personal token table and indexes without changing
+existing OAuth credentials. Apply it before serving the updated application.
 
 Before upgrading, check for duplicate accounts and legacy client types:
 

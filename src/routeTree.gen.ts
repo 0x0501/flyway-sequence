@@ -14,6 +14,7 @@ import { Route as ClientsRouteImport } from './routes/clients'
 import { Route as ConsentRouteImport } from './routes/consent'
 import { Route as PoolRouteImport } from './routes/pool'
 import { Route as SignInRouteImport } from './routes/sign-in'
+import { Route as TokensRouteImport } from './routes/tokens'
 import { Route as ApiMcpRouteImport } from './routes/api/mcp'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as DotwellKnownOauthAuthorizationServerApiAuthRouteImport } from './routes/[.]well-known/oauth-authorization-server/api/auth'
@@ -42,6 +43,11 @@ const PoolRoute = PoolRouteImport.update({
 const SignInRoute = SignInRouteImport.update({
   id: '/sign-in',
   path: '/sign-in',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TokensRoute = TokensRouteImport.update({
+  id: '/tokens',
+  path: '/tokens',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiMcpRoute = ApiMcpRouteImport.update({
@@ -73,6 +79,7 @@ export interface FileRoutesByFullPath {
   '/consent': typeof ConsentRoute
   '/pool': typeof PoolRoute
   '/sign-in': typeof SignInRoute
+  '/tokens': typeof TokensRoute
   '/api/mcp': typeof ApiMcpRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/.well-known/oauth-authorization-server/api/auth': typeof DotwellKnownOauthAuthorizationServerApiAuthRoute
@@ -84,6 +91,7 @@ export interface FileRoutesByTo {
   '/consent': typeof ConsentRoute
   '/pool': typeof PoolRoute
   '/sign-in': typeof SignInRoute
+  '/tokens': typeof TokensRoute
   '/api/mcp': typeof ApiMcpRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/.well-known/oauth-authorization-server/api/auth': typeof DotwellKnownOauthAuthorizationServerApiAuthRoute
@@ -96,6 +104,7 @@ export interface FileRoutesById {
   '/consent': typeof ConsentRoute
   '/pool': typeof PoolRoute
   '/sign-in': typeof SignInRoute
+  '/tokens': typeof TokensRoute
   '/api/mcp': typeof ApiMcpRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/.well-known/oauth-authorization-server/api/auth': typeof DotwellKnownOauthAuthorizationServerApiAuthRoute
@@ -109,6 +118,7 @@ export interface FileRouteTypes {
     | '/consent'
     | '/pool'
     | '/sign-in'
+    | '/tokens'
     | '/api/mcp'
     | '/api/auth/$'
     | '/.well-known/oauth-authorization-server/api/auth'
@@ -120,6 +130,7 @@ export interface FileRouteTypes {
     | '/consent'
     | '/pool'
     | '/sign-in'
+    | '/tokens'
     | '/api/mcp'
     | '/api/auth/$'
     | '/.well-known/oauth-authorization-server/api/auth'
@@ -131,6 +142,7 @@ export interface FileRouteTypes {
     | '/consent'
     | '/pool'
     | '/sign-in'
+    | '/tokens'
     | '/api/mcp'
     | '/api/auth/$'
     | '/.well-known/oauth-authorization-server/api/auth'
@@ -143,6 +155,7 @@ export interface RootRouteChildren {
   ConsentRoute: typeof ConsentRoute
   PoolRoute: typeof PoolRoute
   SignInRoute: typeof SignInRoute
+  TokensRoute: typeof TokensRoute
   ApiMcpRoute: typeof ApiMcpRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   DotwellKnownOauthAuthorizationServerApiAuthRoute: typeof DotwellKnownOauthAuthorizationServerApiAuthRoute
@@ -186,6 +199,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignInRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/tokens': {
+      id: '/tokens'
+      path: '/tokens'
+      fullPath: '/tokens'
+      preLoaderRoute: typeof TokensRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/mcp': {
       id: '/api/mcp'
       path: '/api/mcp'
@@ -223,6 +243,7 @@ const rootRouteChildren: RootRouteChildren = {
   ConsentRoute: ConsentRoute,
   PoolRoute: PoolRoute,
   SignInRoute: SignInRoute,
+  TokensRoute: TokensRoute,
   ApiMcpRoute: ApiMcpRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   DotwellKnownOauthAuthorizationServerApiAuthRoute:

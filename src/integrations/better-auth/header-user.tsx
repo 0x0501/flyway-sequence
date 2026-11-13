@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { authClient } from "#/lib/auth-client";
 
 export default function BetterAuthHeader() {
@@ -26,6 +27,12 @@ export default function BetterAuthHeader() {
 
 	return (
 		<div className="flex items-center gap-3">
+			<Link
+				to="/tokens"
+				className="inline-flex min-h-11 items-center text-sm md:hidden"
+			>
+				Tokens
+			</Link>
 			<div className="hidden items-center gap-2.5 sm:flex">
 				{session.user.image ? (
 					<img

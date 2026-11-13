@@ -62,7 +62,11 @@ export const Route = createFileRoute("/api/mcp")({
 		middleware: [betterAuthMiddleware],
 		handlers: {
 			POST: async ({ request, context }) => {
-				const access = await authenticateMcpRequest(request, context.auth);
+				const access = await authenticateMcpRequest(
+					request,
+					context.auth,
+					context.db,
+				);
 				if (!access.ok) return access.response;
 				return handleMcpRequest(request, { authInfo: access.authInfo });
 			},

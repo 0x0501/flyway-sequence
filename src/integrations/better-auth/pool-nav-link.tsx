@@ -11,6 +11,9 @@ export default function PoolNavLink() {
 			<Link to="/clients" className="transition-colors hover:text-[var(--ink)]">
 				Clients
 			</Link>
+			<Link to="/tokens" className="transition-colors hover:text-[var(--ink)]">
+				Tokens
+			</Link>
 		</>
 	) : null;
 }

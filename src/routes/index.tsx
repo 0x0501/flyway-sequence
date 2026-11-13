@@ -2,6 +2,7 @@ import { ClientOnly, createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { clientEnv } from "#/clientEnv.ts";
 import { authClient } from "#/lib/auth-client.ts";
+import { bearerInstallSnippets } from "#/lib/bearer-install.ts";
 import { buildSignInRoute } from "#/lib/sign-in-flow.ts";
 
 export const Route = createFileRoute("/")({ component: Home });
@@ -144,8 +145,9 @@ function InstallSection() {
 						Install in your MCP client
 					</h2>
 					<p className="mt-3 text-[15px] leading-relaxed text-[var(--ink-muted)]">
-						Register the application once on the Clients page, then use its
-						client ID below. Your client must support MCP 2026-07-28.
+						Choose OAuth with a registered client, or create a personal token on
+						the Tokens page for Bearer auth. Your client must support MCP
+						2026-07-28.
 					</p>
 				</div>
 
@@ -159,10 +161,12 @@ function InstallSection() {
 
 function InstallCard() {
 	const [target, setTarget] = useState<InstallTarget>("claude-code");
+	const [authMode, setAuthMode] = useState<"oauth" | "bearer">("oauth");
 	const [copied, setCopied] = useState(false);
 
 	const snippet = INSTALL_SNIPPETS[target];
-	const body = snippet.body;
+	const body =
+		authMode === "oauth" ? snippet.body : bearerInstallSnippets[target];
 
 	async function handleCopy() {
 		try {
@@ -176,6 +180,28 @@ function InstallCard() {
 
 	return (
 		<div className="mt-10 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--bg-elevated)]">
+			<div className="flex flex-wrap items-center gap-3 border-b border-[var(--border)] px-5 py-3">
+				<label htmlFor="install-auth" className="text-sm font-medium">
+					Authentication
+				</label>
+				<select
+					id="install-auth"
+					value={authMode}
+					onChange={(event) => {
+						setAuthMode(event.target.value === "bearer" ? "bearer" : "oauth");
+						setCopied(false);
+					}}
+					className="min-h-11 rounded-md border border-[var(--border-strong)] bg-[var(--bg)] px-3 text-sm"
+				>
+					<option value="oauth">OAuth</option>
+					<option value="bearer">Bearer token</option>
+				</select>
+				{authMode === "bearer" ? (
+					<Link to="/tokens" className="text-sm underline underline-offset-4">
+						Create a token
+					</Link>
+				) : null}
+			</div>
 			<div className="flex items-center border-b border-[var(--border)]">
 				<div className="flex">
 					{(Object.keys(INSTALL_SNIPPETS) as InstallTarget[]).map((key) => {
@@ -206,9 +232,11 @@ function InstallCard() {
 			</div>
 
 			<div className="px-5 pt-4 pb-1 font-mono text-[11px] text-[var(--ink-subtle)]">
-				{snippet.hint}
+				{authMode === "oauth"
+					? snippet.hint
+					: "Create a personal token on the Tokens page, then replace YOUR_PERSONAL_TOKEN. No OAuth login required."}
 			</div>
-			<pre className="overflow-x-auto px-5 pb-5 pt-2 font-mono text-[13px] leading-6 text-[var(--ink)]">
+			<pre className="whitespace-pre-wrap break-words px-5 pb-5 pt-2 font-mono text-[13px] leading-6 text-[var(--ink)]">
 				<code>{body}</code>
 			</pre>
 		</div>
@@ -238,7 +266,7 @@ function InstallCardStatic() {
 			<div className="px-5 pt-4 pb-1 font-mono text-[11px] text-[var(--ink-subtle)]">
 				{snippet.hint}
 			</div>
-			<pre className="overflow-x-auto px-5 pb-5 pt-2 font-mono text-[13px] leading-6 text-[var(--ink)]">
+			<pre className="whitespace-pre-wrap break-words px-5 pb-5 pt-2 font-mono text-[13px] leading-6 text-[var(--ink)]">
 				<code>{snippet.body}</code>
 			</pre>
 		</div>

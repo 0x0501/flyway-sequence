@@ -10,9 +10,16 @@ import {
 	verifyJwsAccessToken,
 } from "better-auth/oauth2";
 import { errors } from "jose";
+import type { DBClient } from "#/db/client.ts";
 import { env } from "#/env.ts";
 import type { createAuthServer } from "#/lib/auth.ts";
 import { getAuthIssuer } from "#/lib/oauth-urls.ts";
+import { PERSONAL_TOKEN_PREFIX } from "#/lib/personal-token-policy.ts";
+import {
+	findPersonalToken,
+	recordPersonalTokenUse,
+} from "#/services/personal-token.ts";
+import { verifyUserOrgAccess } from "./org-access.ts";
 
 // Public keys only; Better Auth owns TTL, concurrent fetches and key-rotation refresh.
 const jwksCacheKey = {};
@@ -28,11 +35,15 @@ function invalidToken() {
 export async function authenticateMcpRequest(
 	request: Request,
 	auth: {
-		api: Pick<ReturnType<typeof createAuthServer>["api"], "getJwks">;
+		api: Pick<
+			ReturnType<typeof createAuthServer>["api"],
+			"getJwks" | "getAccessToken"
+		>;
 		$context: Promise<{
 			internalAdapter: Parameters<typeof createDpopReplayStore>[0];
 		}>;
 	},
+	db?: DBClient,
 ): Promise<
 	{ ok: true; authInfo: AuthInfo } | { ok: false; response: Response }
 > {
@@ -42,6 +53,38 @@ export async function authenticateMcpRequest(
 		);
 		if (!authorization || authorization.scheme === "Unknown")
 			throw invalidToken();
+		if (authorization.token.startsWith(PERSONAL_TOKEN_PREFIX)) {
+			if (authorization.scheme !== "Bearer" || !db) throw invalidToken();
+			const record = await findPersonalToken(db, authorization.token);
+			if (!record) throw invalidToken();
+			if (
+				!(await verifyUserOrgAccess(
+					auth,
+					db,
+					record.userId,
+					env.GITHUB_ORGANIZATION,
+				))
+			)
+				return {
+					ok: false,
+					response: Response.json(
+						{ error: "GitHub organization membership is required." },
+						{ status: 403 },
+					),
+				};
+			if (!(await recordPersonalTokenUse(db, record.id))) throw invalidToken();
+			return {
+				ok: true,
+				authInfo: {
+					token: authorization.token,
+					clientId: `personal-token:${record.id}`,
+					scopes: ["mcp:write"],
+					expiresAt: Math.floor(record.expiresAt.getTime() / 1000),
+					resource: new URL(env.MCP_RESOURCE_URL),
+					extra: { userId: record.userId },
+				},
+			};
+		}
 		// Read local JWKS in-process: Workers cannot fetch their own custom domain.
 		const payload = await verifyJwsAccessToken(authorization.token, {
 			jwksFetch: () => auth.api.getJwks(),
